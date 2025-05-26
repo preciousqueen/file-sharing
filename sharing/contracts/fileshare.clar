@@ -152,7 +152,7 @@
   (begin
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) false)
-    
+
     ;; Just directly set the file ID as the only item in the user's file list
     ;; This is a simplification - in a real implementation, you'd want to append to the existing list
     (map-set user-files
@@ -206,7 +206,7 @@
     (asserts! (is-valid-file-name file-name) ERR_INVALID_FILE_NAME)
     (asserts! (is-valid-description description) ERR_INVALID_DESCRIPTION)
     (asserts! (is-valid-content-type content-type) ERR_INVALID_CONTENT_TYPE)
-    
+
     ;; Save file data
     (map-set files
       { file-id: file-id }
@@ -221,13 +221,13 @@
         content-type: content-type
       }
     )
-    
+
     ;; Add to user's file list
     (asserts! (add-file-to-user-files tx-sender file-id) ERR_LIST_TOO_LONG)
-    
+
     ;; Update user activity
     (update-user-activity tx-sender true false)
-    
+
     ;; Return success with file ID
     (ok file-id)
   )
@@ -254,10 +254,10 @@
     (asserts! (is-valid-file-name new-file-name) ERR_INVALID_FILE_NAME)
     (asserts! (is-valid-description new-description) ERR_INVALID_DESCRIPTION)
     (asserts! (is-valid-content-type new-content-type) ERR_INVALID_CONTENT_TYPE)
-    
+
     ;; Check authorization - user must have write access
     (asserts! has-write-access ERR_NOT_AUTHORIZED)
-    
+
     ;; Update file data
     (map-set files
       { file-id: file-id }
@@ -272,7 +272,7 @@
         content-type: new-content-type
       }
     )
-    
+
     (ok true)
   )
 )
@@ -291,31 +291,31 @@
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
     (asserts! (not (is-eq user tx-sender)) ERR_INVALID_USER) ;; Can't grant permission to self
-    
+
     ;; Check that the sender is the file owner
     (asserts! (is-eq (get owner file-data) tx-sender) ERR_NOT_AUTHORIZED)
-    
+
     ;; Validate the access level is within range
     (asserts! (is-valid-access-level access-level) ERR_INVALID_ACCESS_LEVEL)
-    
+
     ;; Check if permission already exists (optional)
     ;; (asserts! (is-none existing-permission) ERR_PERMISSION_ALREADY_GRANTED)
-    
+
     ;; Set the permission
     (map-set file-permissions
       { file-id: file-id, user: user }
       { access-level: access-level }
     )
-    
+
     ;; Record in history
     (map-set sharing-history
       { file-id: file-id, user: user, timestamp: current-time }
       { granted-by: tx-sender, access-level: access-level }
     )
-    
+
     ;; Update user activity
     (update-user-activity tx-sender false true)
-    
+
     (ok true)
   )
 )
@@ -331,16 +331,16 @@
   )
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
-    
+
     ;; Check that the sender is the file owner
     (asserts! (is-eq (get owner file-data) tx-sender) ERR_NOT_AUTHORIZED)
-    
+
     ;; Prevent revoking own access
     (asserts! (not (is-eq user tx-sender)) ERR_REVOKE_OWN_ACCESS)
-    
+
     ;; Delete the permission
     (map-delete file-permissions { file-id: file-id, user: user })
-    
+
     (ok true)
   )
 )
@@ -357,10 +357,10 @@
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
     (asserts! (not (is-eq new-owner tx-sender)) ERR_INVALID_USER) ;; Can't transfer to self
-    
+
     ;; Check that the sender is the file owner
     (asserts! (is-eq (get owner file-data) tx-sender) ERR_NOT_AUTHORIZED)
-    
+
     ;; Update file data with new owner
     (map-set files
       { file-id: file-id }
@@ -375,10 +375,10 @@
         content-type: (get content-type file-data)
       }
     )
-    
+
     ;; Remove from current owner's files and add to new owner's files
     (asserts! (add-file-to-user-files new-owner file-id) ERR_LIST_TOO_LONG)
-    
+
     (ok true)
   )
 )
@@ -392,15 +392,15 @@
   )
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
-    
+
     ;; Check that the sender is the file owner
     (asserts! (is-eq (get owner file-data) tx-sender) ERR_NOT_AUTHORIZED)
-    
+
     ;; Delete the file
     (map-delete files { file-id: file-id })
-    
+
     ;; Note: In a real implementation, we might want to clean up all permissions as well
-    
+
     (ok true)
   )
 )
@@ -412,7 +412,7 @@
   (begin
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
-    
+
     (let (
       (file-data (map-get? files { file-id: file-id }))
     )
@@ -430,7 +430,7 @@
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
     (asserts! (is-valid-access-level required-level) ERR_INVALID_ACCESS_LEVEL)
-    
+
     (ok (has-permission file-id user required-level))
   )
 )
@@ -467,7 +467,7 @@
   (begin
     ;; Validate inputs
     (asserts! (is-valid-file-id file-id) ERR_INVALID_FILE_ID)
-    
+
     (let (
       (file-data (map-get? files { file-id: file-id }))
       (permission-data (map-get? file-permissions { file-id: file-id, user: user }))
